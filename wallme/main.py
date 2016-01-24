@@ -5,6 +5,9 @@ import json
 import click
 import os
 from wallme.downloaders import finder as download_finder
+from wallme.downloaders.finder import DOWNLOADERS
+from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
+from wallme.wallpaper_setters.finder import WALL_SETTERS, get_dlmodule as get_setter_dlmodule
 
 WALLME_DIR = os.path.join(os.path.expanduser('~'), '.wallme')
 
@@ -54,14 +57,29 @@ def reddit(subreddit, tab, position, setter, log):
     content = downloader.download(subreddit, tab=tab, position=position or None)
     set_wallpaper(content, setter, log)
 
+@cli.command('list', help='list modules')
+@click.option('-a', '--all', is_flag=True, help='list all modules')
+def list_modules(all):
+    click.echo('Downloaders:')
+    for el in DOWNLOADERS:
+        click.echo('\t{}'.format(el))
+    if all:
+        click.echo('Image Downloaders:')
+        for el in IMAGE_DOWNLOADERS:
+            click.echo('\t{}'.format(el))
+        click.echo('Image Setters:')
+        for el in WALL_SETTERS:
+            click.echo('\t{}'.format(el))
+
 def set_wallpaper(content, setter, to_log):
+    """finds a setter module and uses it to set a wallpaper"""
     home = os.path.expanduser('~')
     image_loc = os.path.join(home, '.wallme/wallpaper')
     with open(image_loc, 'wb') as wallme_file:
         wallme_file.write(content['content'])
     # set wallpaper
-    # todo implement custom setters
-    subprocess.Popen('feh --bg-fill {}'.format(image_loc), shell=True)
+    setter = get_wallpaper_setter(setter)
+    setter(image_loc)
     click.echo('wallpaper set from {}'.format(content['url']))
     if to_log:
         click.echo('saving wallpaper to log')
@@ -107,11 +125,15 @@ def init():
 
 
 
-def get_downloader(downloader):
-    downloader_module = download_finder.get_dlmodule(downloader)
-    downloader_cls = getattr(downloader_module, '{}Downloader'.format(downloader.title()))
+def get_downloader(downloader_name):
+    downloader_module = download_finder.get_dlmodule(downloader_name)
+    downloader_cls = getattr(downloader_module, '{}Downloader'.format(downloader_name.title()))
     return downloader_cls()
 
+def get_wallpaper_setter(setter_name):
+    setter_module = get_setter_dlmodule(setter_name)
+    setter_func = getattr(setter_module, 'set_wallpaper')
+    return setter_func
 
 if __name__ == '__main__':
     cli()

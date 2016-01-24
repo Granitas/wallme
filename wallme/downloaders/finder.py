@@ -9,3 +9,4 @@ DOWNLOADERS = [n for _, n, _ in pkgutil.iter_modules([os.path.dirname(downloader
 def get_dlmodule(name):
     return importlib.import_module('wallme.downloaders.{}'.format(name))
 
+

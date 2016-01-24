@@ -1,0 +1,5 @@
+click
+praw
+requests
+tldextract
+parsel

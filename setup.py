@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='wallme',
-    version='0.1',
+    version='0.11',
     packages=find_packages(),
     url='.',
     license='gpl',
@@ -12,7 +12,9 @@ setup(
     install_requires=[
         'click',
         'requests',
-        'praw'
+        'praw',
+        'tldextract',
+        'parsel'
     ],
     include_package_data=True,
     entry_points="""
