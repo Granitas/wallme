@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import logging
+import subprocess
 
 import click
 import os
@@ -27,8 +28,8 @@ def cli(debug):
 @cli.command('reddit', help='download from reddit.com')
 @click.argument('subreddit')
 @click.option('-p', '--position', default=0, help='result position; 0 == random')
-@click.option('-l/-nl', '--log/--no-log', default=True, help='log wallpaper')
-@click.option('-t', '--tab', default='hot', help='tab name',
+@click.option('--log/--no-log', default=True, help='log wallpaper')
+@click.option('--tab', default='hot', help='tab name',
               type=click.Choice([
                   'controversial',
                   'controversial_from_all',
@@ -47,17 +48,18 @@ def cli(debug):
                   'top_from_month',
                   'top_from_week',
                   'top_from_year']))
-@click.option('-s', '--setter', help='script that sets wallpaper',
+@click.option('--setter', help='script that sets wallpaper',
               type=click.Choice([
                   'feh',
               ]),
               default='feh')
-def reddit(subreddit, tab, position, setter, log):
+@click.option('-ss', '--setter_script', help='script to set wallpaper, {file} replaced with filename')
+def reddit(subreddit, tab, position, setter, log, setter_script):
     """Downloader for reddit.com"""
     click.echo('setting random wallpaper from /r/{} {} tab'.format(subreddit, tab))
     downloader = get_downloader('reddit')
     content = downloader.download(subreddit, tab=tab, position=position or None)
-    set_wallpaper(content, setter, log)
+    set_wallpaper(content, setter, log, setter_script)
 
 @cli.command('list', help='list modules')
 @click.option('-a', '--all', 'list_all', is_flag=True, help='list all modules')
@@ -73,15 +75,18 @@ def list_modules(list_all):
         for el in WALL_SETTERS:
             click.echo('\t{}'.format(el))
 
-def set_wallpaper(content, setter, to_log):
+def set_wallpaper(content, setter, to_log, setter_script=None):
     """finds a setter module and uses it to set a wallpaper"""
     home = os.path.expanduser('~')
     image_loc = os.path.join(home, '.wallme/wallpaper')
     with open(image_loc, 'wb') as wallme_file:
         wallme_file.write(content['content'])
     # set wallpaper
-    setter = get_wallpaper_setter(setter)
-    setter(image_loc)
+    if setter_script:
+        subprocess.Popen(setter_script.format(file=image_loc), shell=True)
+    else:
+        setter = get_wallpaper_setter(setter)
+        setter(image_loc)
     click.echo('wallpaper set from {}'.format(content['url']))
     if to_log:
         click.echo('saving wallpaper to log')
