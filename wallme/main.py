@@ -1,6 +1,6 @@
-import subprocess
 from datetime import datetime
 import json
+import logging
 
 import click
 import os
@@ -13,13 +13,15 @@ WALLME_DIR = os.path.join(os.path.expanduser('~'), '.wallme')
 
 @click.group()
 @click.version_option()
-def cli():
+@click.option('--debug', 'debug', default=False, help='set verbosity', is_flag=True)
+def cli(debug):
     """
-    Wallme.
-
     Modular wallpaper getter and setter.
     """
-    pass
+    if debug:
+        log_stream = logging.StreamHandler()
+        log_stream.setLevel(logging.DEBUG)
+        logging.basicConfig(handlers=[log_stream])
 
 
 @cli.command('reddit', help='download from reddit.com')
@@ -58,12 +60,12 @@ def reddit(subreddit, tab, position, setter, log):
     set_wallpaper(content, setter, log)
 
 @cli.command('list', help='list modules')
-@click.option('-a', '--all', is_flag=True, help='list all modules')
-def list_modules(all):
+@click.option('-a', '--all', 'list_all', is_flag=True, help='list all modules')
+def list_modules(list_all):
     click.echo('Downloaders:')
     for el in DOWNLOADERS:
         click.echo('\t{}'.format(el))
-    if all:
+    if list_all:
         click.echo('Image Downloaders:')
         for el in IMAGE_DOWNLOADERS:
             click.echo('\t{}'.format(el))
