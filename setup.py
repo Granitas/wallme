@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='wallme',
-    version='0.11',
+    version='0.12',
     packages=find_packages(),
     url='.',
     license='gpl',
