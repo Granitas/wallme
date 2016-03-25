@@ -4,8 +4,10 @@ import os
 from wallme import image_downloaders
 import tldextract
 
+NON_MODULES = ['finder', 'base', 'content']
 IMAGE_DOWNLOADERS = [n for _, n, _ in pkgutil.iter_modules([os.path.dirname(image_downloaders.__file__)])
-                     if 'finder' not in n and 'base' not in n]
+                     if not any(non in n for non in NON_MODULES)]
+
 
 def get_dlmodule_bydomain(url):
     """

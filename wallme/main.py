@@ -9,12 +9,12 @@ import click
 import os
 from wallme.downloaders.bing import BingDownloader
 from wallme.downloaders.finder import DOWNLOADERS
+from wallme.downloaders.local import LocalNonDownloader
 from wallme.downloaders.microsoft import MicrosoftDownloader
 from wallme.downloaders.reddit import RedditDownloader
 from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
 from wallme.wallpaper_setters.finder import WALL_SETTERS, get_dlmodule as get_setter_dlmodule
-
-WALLME_DIR = os.path.join(os.path.expanduser('~'), '.wallme')
+from wallme.settings import WALLME_DIR
 
 
 @click.group()
@@ -68,6 +68,20 @@ def bing(cli_kwargs, date):
     click.echo('setting daily image from bing for {} as wallpaper'.format(date or 'Today'))
     downloader = BingDownloader()
     content = downloader.download(date)
+    set_wallpaper(content, cli_kwargs)
+
+
+@cli.command('local', help='set an image from local history')
+@click.pass_context
+@click.option('--position', default=None, help='image position, default random')
+@click.option('--year_month', default=None, help='specify year and month; format %Y%m')
+def local(cli_kwargs, position, year_month):
+    """Downloader (not really) for local wallme history"""
+    position_text = 'random' if position is None else position
+    click.echo("setting {} image from local history".format(position_text))
+    downloader = LocalNonDownloader()
+    content = downloader.download(year_month, position)
+    cli_kwargs.obj['no_log'] = True
     set_wallpaper(content, cli_kwargs)
 
 
