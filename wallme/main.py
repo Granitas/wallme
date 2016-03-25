@@ -20,13 +20,11 @@ WALLME_DIR = os.path.join(os.path.expanduser('~'), '.wallme')
 @click.group()
 @click.version_option()
 @click.option('--debug', default=False, help='set verbosity', is_flag=True)
-@click.option('--log/--no-log', 'to_log', default=True, help='log wallpaper')
+@click.option('--no-log', is_flag=True, default=False, help='log wallpaper')
 @click.option('--setter', help='script that sets wallpaper',
-              type=click.Choice([
-                  'feh',
-              ]),
+              type=click.Choice(['feh', ]),
               default='feh')
-@click.option('-ss', '--setter_script', help='script to set wallpaper, {file} replaced with filename')
+@click.option('--setter_script', help='script to set wallpaper, {file} replaced with filename')
 @click.pass_context
 def cli(context, **kwargs):
     """
@@ -39,7 +37,7 @@ def cli(context, **kwargs):
         logging.basicConfig(handlers=[log_stream])
 
 
-@cli.command('reddit', help='download from reddit.com')
+@cli.command('reddit', help='download image from reddit.com')
 @click.pass_context
 @click.argument('subreddit')
 @click.option('--position', default=0, help='result position; 0 == random')
@@ -128,7 +126,7 @@ def set_wallpaper(content, context):
         setter = get_wallpaper_setter(context.obj['setter'])
         setter(image_loc)
     click.echo('wallpaper set from {}'.format(content['url']))
-    if context.obj['to_log']:
+    if not context.obj['no_log']:
         click.echo('saving wallpaper to log')
         log_wallpaper(content)
 

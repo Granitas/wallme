@@ -1,7 +1,4 @@
-from urllib.parse import urljoin
-
 import sys
-
 import random
 
 import requests
