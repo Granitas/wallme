@@ -9,7 +9,7 @@ class ImageDownloader(BaseImageDownloader):
         sel = parsel.Selector(text=response.text)
         url = sel.xpath("//div[@class='post-image']/a/img/@src").extract_first()
         if url:
-            url = utils.fix_url(url)
+            url = utils.fix_url_http(url)
             file_resp = requests.get(url)
             return make_content(file_resp, meta)
         return {}

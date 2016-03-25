@@ -31,6 +31,7 @@ def make_content(response, meta=None):
 
 BIGGEST_IMAGE = 'find_biggest_image'
 
+
 class BaseImageDownloader:
 
     def __init__(self, default_behaviour=BIGGEST_IMAGE):
@@ -77,7 +78,7 @@ class BaseImageDownloader:
             if '.' in os.path.basename(image):
                 print(image)
                 urls.append(image)
-        urls = [utils.fix_url(u, parent=response.url) for u in urls]
+        urls = [utils.fix_url_http(u, parent=response.url) for u in urls]
 
         images = []
         for i, url in enumerate(urls):

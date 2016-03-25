@@ -6,7 +6,7 @@ try:
 
     pip install git+https://github.com/Granitas/wallme
     wallme --help
-    wallme init
+    wallme init  # creates ~/.wallme
     wallme reddit wallpapers  # random wallpaper from reddit.com/r/wallpapers
     or
     wallme reddit wallpapers --setter_script "feh --bg-fill {file}"

@@ -6,3 +6,5 @@ dist
 venv
 *.egg
 *.egg-info
+*.pyc
+__pycache__

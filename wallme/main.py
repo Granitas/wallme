@@ -3,63 +3,94 @@ import json
 import logging
 import subprocess
 
+import sys
+
 import click
 import os
-from wallme.downloaders import finder as download_finder
+from wallme.downloaders.bing import BingDownloader
 from wallme.downloaders.finder import DOWNLOADERS
+from wallme.downloaders.microsoft import MicrosoftDownloader
+from wallme.downloaders.reddit import RedditDownloader
 from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
 from wallme.wallpaper_setters.finder import WALL_SETTERS, get_dlmodule as get_setter_dlmodule
 
 WALLME_DIR = os.path.join(os.path.expanduser('~'), '.wallme')
 
+
 @click.group()
 @click.version_option()
-@click.option('--debug', 'debug', default=False, help='set verbosity', is_flag=True)
-def cli(debug):
-    """
-    Modular wallpaper getter and setter.
-    """
-    if debug:
-        log_stream = logging.StreamHandler()
-        log_stream.setLevel(logging.DEBUG)
-        logging.basicConfig(handlers=[log_stream])
-
-
-@cli.command('reddit', help='download from reddit.com')
-@click.argument('subreddit')
-@click.option('-p', '--position', default=0, help='result position; 0 == random')
-@click.option('--log/--no-log', default=True, help='log wallpaper')
-@click.option('--tab', default='hot', help='tab name',
-              type=click.Choice([
-                  'controversial',
-                  'controversial_from_all',
-                  'controversial_from_day',
-                  'controversial_from_hour',
-                  'controversial_from_month',
-                  'controversial_from_week',
-                  'controversial_from_year',
-                  'hot',
-                  'new',
-                  'rising',
-                  'top',
-                  'top_from_all',
-                  'top_from_day',
-                  'top_from_hour',
-                  'top_from_month',
-                  'top_from_week',
-                  'top_from_year']))
+@click.option('--debug', default=False, help='set verbosity', is_flag=True)
+@click.option('--log/--no-log', 'to_log', default=True, help='log wallpaper')
 @click.option('--setter', help='script that sets wallpaper',
               type=click.Choice([
                   'feh',
               ]),
               default='feh')
 @click.option('-ss', '--setter_script', help='script to set wallpaper, {file} replaced with filename')
-def reddit(subreddit, tab, position, setter, log, setter_script):
+@click.pass_context
+def cli(context, **kwargs):
+    """
+    Modular wallpaper getter and setter.
+    """
+    context.obj = kwargs
+    if kwargs['debug']:
+        log_stream = logging.StreamHandler()
+        log_stream.setLevel(logging.DEBUG)
+        logging.basicConfig(handlers=[log_stream])
+
+
+@cli.command('reddit', help='download from reddit.com')
+@click.pass_context
+@click.argument('subreddit')
+@click.option('--position', default=0, help='result position; 0 == random')
+@click.option('--list-tabs', default=False, is_flag=True, help='list available tabs')
+@click.option('--tab', default='hot', help='tab name')
+@click.option('-ss', '--setter_script', help='script to set wallpaper, {file} replaced with filename')
+def reddit(cli_kwargs, subreddit, tab, position, list_tabs):
     """Downloader for reddit.com"""
+    downloader = RedditDownloader()
+    if list_tabs:
+        click.echo('Available Tabs:')
+        for tab in downloader.tabs:
+            click.echo(tab)
+        return
+    if tab not in downloader.tabs:
+        e = ValueError('Incorrect tab see --list-tabs for viable options')
+        sys.exit(e)
     click.echo('setting random wallpaper from /r/{} {} tab'.format(subreddit, tab))
-    downloader = get_downloader('reddit')
     content = downloader.download(subreddit, tab=tab, position=position or None)
-    set_wallpaper(content, setter, log, setter_script)
+    set_wallpaper(content, cli_kwargs)
+
+
+@cli.command('bing', help='download image of the day from bing.com')
+@click.pass_context
+@click.option('--date', default=None, help='date of daily image in Y-m-d format')
+def bing(cli_kwargs, date):
+    """Downloader for image of the day of bing.com"""
+    click.echo('setting daily image from bing for {} as wallpaper'.format(date or 'Today'))
+    downloader = BingDownloader()
+    content = downloader.download(date)
+    set_wallpaper(content, cli_kwargs)
+
+
+@cli.command('microsoft', help='download image from microsoft wallpapers')
+@click.pass_context
+@click.option('--list', default=False, is_flag=True, help='list available categories')
+@click.option('--category', default='all', help='category from which to download images, see --list')
+@click.option('--position', default=None, help='image position, default random')
+def microsoft(cli_kwargs, category, position, list):
+    """Downloader for image of the day of bing.com"""
+    downloader = MicrosoftDownloader()
+    if list:
+        click.echo("Available Categories:")
+        for cat in downloader.get_categories():
+            click.echo(cat)
+        return
+    position_text = 'random' if position is None else position
+    click.echo('setting image {} from category {}'.format(position_text, category))
+    content = downloader.download(category, position)
+    set_wallpaper(content, cli_kwargs)
+
 
 @cli.command('list', help='list modules')
 @click.option('-a', '--all', 'list_all', is_flag=True, help='list all modules')
@@ -75,22 +106,32 @@ def list_modules(list_all):
         for el in WALL_SETTERS:
             click.echo('\t{}'.format(el))
 
-def set_wallpaper(content, setter, to_log, setter_script=None):
-    """finds a setter module and uses it to set a wallpaper"""
+
+# def set_wallpaper(content, setter, to_log, setter_script=None):
+def set_wallpaper(content, context):
+    """
+    finds a setter module and uses it to set a wallpaper
+    :param content: content dict for image
+    :param setter_script - script for setting
+    :param setter
+    :param to_log
+    """
     home = os.path.expanduser('~')
     image_loc = os.path.join(home, '.wallme/wallpaper')
     with open(image_loc, 'wb') as wallme_file:
         wallme_file.write(content['content'])
     # set wallpaper
+    setter_script = context.obj['setter_script']
     if setter_script:
         subprocess.Popen(setter_script.format(file=image_loc), shell=True)
     else:
-        setter = get_wallpaper_setter(setter)
+        setter = get_wallpaper_setter(context.obj['setter'])
         setter(image_loc)
     click.echo('wallpaper set from {}'.format(content['url']))
-    if to_log:
+    if context.obj['to_log']:
         click.echo('saving wallpaper to log')
         log_wallpaper(content)
+
 
 def log_wallpaper(content):
     """Saves wallpaper content and meta info to .wallme/history"""
@@ -131,16 +172,11 @@ def init():
         click.echo('{} already exists'.format(WALLME_DIR))
 
 
-
-def get_downloader(downloader_name):
-    downloader_module = download_finder.get_dlmodule(downloader_name)
-    downloader_cls = getattr(downloader_module, '{}Downloader'.format(downloader_name.title()))
-    return downloader_cls()
-
 def get_wallpaper_setter(setter_name):
     setter_module = get_setter_dlmodule(setter_name)
     setter_func = getattr(setter_module, 'set_wallpaper')
     return setter_func
+
 
 if __name__ == '__main__':
     cli()
