@@ -10,7 +10,8 @@ from wallme.image_downloaders.content import make_content
 
 class LocalNonDownloader(BaseDownloader):
     """
-    Downloader for daily image of bing.com
+    Downloader for local history files, doesn't actually
+    download anything just wraps local files as responses
     """
     look_for_dl_module = False
 
@@ -18,6 +19,7 @@ class LocalNonDownloader(BaseDownloader):
     def download(self, year_month=None, position=None):
         """
         :param year_month - specify history month, default all of history
+        :param position - position of image to ues, default random
         :return: dict{'content': <image_content>, <some meta data>...}
         """
         history = os.path.join(settings.WALLME_DIR, 'history')
@@ -30,13 +32,12 @@ class LocalNonDownloader(BaseDownloader):
         # Gather all images in history location
         images = []
         items = list(os.walk(history))
+        items = [i for i in items if i != 'wallpaper' and '.json' not in i]
         for item in items:
             directory, dirs, files = item
             if not files:
                 continue
             for file in files:
-                if file == 'wallme':
-                    continue
                 abs_file = os.path.join(directory, file)
                 images.append(abs_file)
         # choose image (either by position or random)
@@ -54,7 +55,3 @@ class LocalNonDownloader(BaseDownloader):
             image_response._content = image_file.read()
         return make_content(image_response)
 
-
-if __name__ == '__main__':
-    bd = LocalNonDownloader()
-    print(bd.download())

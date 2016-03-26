@@ -1,18 +1,10 @@
-import logging
 from datetime import datetime
-
 import json
-
 from urllib.parse import urljoin
-
 import sys
 
-import random
-import praw
 import requests
 from wallme.downloaders.base import BaseDownloader
-
-from wallme.utils import fix_url_http
 
 
 class BingDownloader(BaseDownloader):
@@ -52,8 +44,3 @@ class BingDownloader(BaseDownloader):
                 'copyright': data.get('copyright'),
                 'url': image_url}
         return self.download_image(image_url, meta)
-
-
-if __name__ == '__main__':
-    bd = BingDownloader()
-    print(bd.download())

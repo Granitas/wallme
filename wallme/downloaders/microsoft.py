@@ -6,7 +6,6 @@ from parsel import Selector
 from wallme.downloaders.base import BaseDownloader
 
 
-
 class MicrosoftDownloader(BaseDownloader):
     """
     Downloader for windows.microsoft.com/en-us/windows/wallpaper
@@ -46,8 +45,3 @@ class MicrosoftDownloader(BaseDownloader):
         meta = {'title': image.xpath('@title').extract_first(),
                 'url': image_url}
         return self.download_image(image_url, meta)
-
-
-if __name__ == '__main__':
-    bd = MicrsoftDownloader()
-    print(bd.download())
