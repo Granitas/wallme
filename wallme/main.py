@@ -11,6 +11,7 @@ from wallme.downloaders.bing import BingDownloader
 from wallme.downloaders.finder import DOWNLOADERS
 from wallme.downloaders.local import LocalNonDownloader
 from wallme.downloaders.microsoft import MicrosoftDownloader
+from wallme.downloaders.natgeo import NatgeoDownloader
 from wallme.downloaders.reddit import RedditDownloader
 from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
 from wallme.wallpaper_setters.finder import WALL_SETTERS, get_dlmodule as get_setter_dlmodule
@@ -73,7 +74,7 @@ def bing(cli_kwargs, date):
 
 @cli.command('local', help='set an image from local history')
 @click.pass_context
-@click.option('--position', default=None, help='image position, default random')
+@click.option('--list', default=False, is_flag=True, help='list available categories')
 @click.option('--year_month', default=None, help='specify year and month; format %Y%m')
 def local(cli_kwargs, position, year_month):
     """Downloader (not really) for local wallme history"""
@@ -89,10 +90,29 @@ def local(cli_kwargs, position, year_month):
 @click.pass_context
 @click.option('--list', default=False, is_flag=True, help='list available categories')
 @click.option('--category', default='all', help='category from which to download images, see --list')
-@click.option('--position', default=None, help='image position, default random')
+@click.option('--position', default=None, type=click.INT, help='image position, default random')
 def microsoft(cli_kwargs, category, position, list):
-    """Downloader for image of the day of bing.com"""
+    """Downloader for windows wallpapers from microsoft"""
     downloader = MicrosoftDownloader()
+    if list:
+        click.echo("Available Categories:")
+        for cat in downloader.get_categories():
+            click.echo(cat)
+        return
+    position_text = 'random' if position is None else position
+    click.echo('setting image {} from category {}'.format(position_text, category))
+    content = downloader.download(category, position)
+    set_wallpaper(content, cli_kwargs)
+
+
+@cli.command('natgeo', help='download image from microsoft wallpapers')
+@click.pass_context
+@click.option('--list', default=False, is_flag=True, help='list available categories')
+@click.option('--category', default='all', help='category from which to download images, see --list')
+@click.option('--position', default=None, type=click.INT, help='image position, default random')
+def natgeo(cli_kwargs, category, position, list):
+    """Downloader for image of the day of nationalgeographic.com"""
+    downloader = NatgeoDownloader()
     if list:
         click.echo("Available Categories:")
         for cat in downloader.get_categories():
