@@ -76,3 +76,6 @@ class NatgeoDownloader(BaseDownloader):
         }
         return self.download_image(image_url, meta)
 
+if __name__ == '__main__':
+    ng = NatgeoDownloader()
+    print(ng.download(category='animals', position=0))

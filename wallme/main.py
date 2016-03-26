@@ -105,10 +105,10 @@ def microsoft(cli_kwargs, category, position, list):
     set_wallpaper(content, cli_kwargs)
 
 
-@cli.command('natgeo', help='download image from microsoft wallpapers')
+@cli.command('natgeo', help='download image from nationalgeographic.com (low resolution)')
 @click.pass_context
 @click.option('--list', default=False, is_flag=True, help='list available categories')
-@click.option('--category', default='all', help='category from which to download images, see --list')
+@click.option('--category', default=None, help='category from which to download images, see --list')
 @click.option('--position', default=None, type=click.INT, help='image position, default random')
 def natgeo(cli_kwargs, category, position, list):
     """Downloader for image of the day of nationalgeographic.com"""
@@ -119,7 +119,8 @@ def natgeo(cli_kwargs, category, position, list):
             click.echo(cat)
         return
     position_text = 'random' if position is None else position
-    click.echo('setting image {} from category {}'.format(position_text, category))
+    click.echo('setting image {} from category {}'
+               .format(position_text, category or downloader.default_cat))
     content = downloader.download(category, position)
     set_wallpaper(content, cli_kwargs)
 
