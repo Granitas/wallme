@@ -44,7 +44,6 @@ def cli(context, **kwargs):
 @click.option('--position', default=0, help='result position; 0 == random')
 @click.option('--list-tabs', default=False, is_flag=True, help='list available tabs')
 @click.option('--tab', default='hot', help='tab name')
-@click.option('-ss', '--setter_script', help='script to set wallpaper, {file} replaced with filename')
 def reddit(cli_kwargs, subreddit, tab, position, list_tabs):
     """Downloader for reddit.com"""
     downloader = RedditDownloader()
