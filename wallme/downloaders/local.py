@@ -1,3 +1,4 @@
+import json
 import sys
 import os
 import random
@@ -23,25 +24,20 @@ class LocalNonDownloader(BaseDownloader):
         :param position - position of image to ues, default random
         :return: dict{'content': <image_content>, <some meta data>...}
         """
-        history = os.path.join(settings.WALLME_DIR, 'history')
-        if year_month:
-            history = os.path.join(history, year_month)
-            if not os.path.exists(history):
-                e = ValueError('No items for supplied '
-                               'yearmonth "{}" value'.format(year_month))
-                sys.exit(e)
-        # Gather all images in history location
+        history_loc = os.path.join(settings.WALLME_DIR, 'history')
+
+        def get_images(ym):
+            with open(os.path.join(history_loc, ym, 'history.json'), 'r') as f:
+                history_json = json.loads(f.read())
+            return [os.path.join(history_loc, ym, i['name']) for i in history_json['items']]
+
         images = []
-        items = list(os.walk(history))
-        items = [i for i in items if i != 'wallpaper' and '.json' not in i]
-        for item in items:
-            directory, dirs, files = item
-            if not files:
-                continue
-            for file in files:
-                abs_file = os.path.join(directory, file)
-                images.append(abs_file)
-        # choose image (either by position or random)
+        if not year_month:
+            yms = sorted(os.listdir(history_loc), key=int)
+            for ym in yms:
+                images.extend(get_images(ym))
+        else:
+            images = get_images(year_month)
         if not position:
             image = random.choice(images)
         elif position <= len(images) or position < 0:
@@ -55,4 +51,3 @@ class LocalNonDownloader(BaseDownloader):
         with open(image, 'rb') as image_file:
             image_response._content = image_file.read()
         return make_content(image_response)
-
