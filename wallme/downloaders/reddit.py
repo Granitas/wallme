@@ -63,7 +63,8 @@ class RedditDownloader(BaseDownloader):
         submission_get_func = getattr(subreddit, 'get_{}'.format(tab), None)
         if not submission_get_func:
             logging.error('Incorrect tab {}'.format(tab))
-        submissions = list(submission_get_func(limit=position or 0))  # download only as many we need; 0 == 25
+        submissions = list(submission_get_func())
+        submissions = [s for s in submissions if '/comments/' not in s.url]
         # choose a submission (either random or by position arg)
         if position is None:
             sub = random.choice(submissions)
