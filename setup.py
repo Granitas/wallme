@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='wallme',
-    version='0.2',
+    version='0.5',
     packages=find_packages(),
-    url='.',
+    url='https://github.com/granitas/wallme',
     license='gpl',
     author='Bernardas Ališauskas',
     author_email='bernardas.alisauskas@gmail.com',
@@ -13,12 +13,11 @@ setup(
         'click',
         'requests',
         'praw',
-        'tldextract',
         'parsel'
     ],
     include_package_data=True,
     entry_points="""
         [console_scripts]
-        wallme=wallme.main:cli
+        wallme=wallme.cli:cli
     """
 )
