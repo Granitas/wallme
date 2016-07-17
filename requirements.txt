@@ -1,5 +1,4 @@
 click
-praw
 requests
-tldextract
 parsel
+praw  # only for "reddit" command
