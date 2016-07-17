@@ -15,8 +15,8 @@ class NatgeoDownloader(BaseDownloader):
     """
     url = "http://photography.nationalgeographic.com/" \
           "photography/photo-of-the-day/archive"
-    url_tpl = "http://photography.nationalgeographic.com/" \
-              "photography/photo-of-the-day/{category}".format
+    url_tpl = "http://photography.nationalgeographic.com/photography" \
+              "/photo-of-the-day/{category}/".format
     default_cat = 'archive'
     # extend
     look_for_dl_module = False
@@ -40,6 +40,7 @@ class NatgeoDownloader(BaseDownloader):
         """
         if not category:
             category = self.default_cat
+        category = category.lower()
         url = self.url_tpl(category=category)
         response = requests.get(url)
         sel = Selector(text=response.text)
