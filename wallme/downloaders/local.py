@@ -16,7 +16,8 @@ class LocalNonDownloader(BaseDownloader):
     look_for_dl_module = False
 
     # noinspection PyMethodOverriding
-    def download(self, year_month=None, position=None):
+    @staticmethod
+    def download(year_month=None, position=None):
         """
         :param year_month - specify history month, default all of history
         :param position - position of image to ues, default random
@@ -43,7 +44,7 @@ class LocalNonDownloader(BaseDownloader):
         # choose image (either by position or random)
         if not position:
             image = random.choice(images)
-        elif position >= len(images):
+        elif position <= len(images) or position < 0:
             image = images[position]
         else:
             e = ValueError('Position too high: pos:{}/images found:{}'.format(position, len(images)))
