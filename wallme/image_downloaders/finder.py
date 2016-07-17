@@ -1,8 +1,9 @@
 import pkgutil
 import importlib
 import os
+from urllib.parse import urlsplit
+
 from wallme import image_downloaders
-import tldextract
 
 NON_MODULES = ['finder', 'base', 'content']
 IMAGE_DOWNLOADERS = [n for _, n, _ in pkgutil.iter_modules([os.path.dirname(image_downloaders.__file__)])
@@ -17,7 +18,7 @@ def get_dlmodule_bydomain(url):
     -> <module 'wallme.image_downloaders.imgur' from ...>
     """
 
-    domain = tldextract.extract(url).domain.lower()
+    domain = urlsplit(url).netloc.split('.')[-2]
     for downloader in IMAGE_DOWNLOADERS:
         if downloader == domain:
             matching_domain = domain
