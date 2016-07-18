@@ -6,7 +6,7 @@ from wallme.history import get_history
 
 
 @click.command('history', help='display history')
-@click.option('-n', '--count', 'count', default=1, help='list all modules')
+@click.option('-n', '--count', 'count', default=1, help='amount of items to display')
 @click.option('--year_month', help='filter specific month of the year, format %Y%m')
 @click.option('--raw', is_flag=True, help='return raw json for parsing')
 def cli(**kwargs):
