@@ -5,6 +5,7 @@ import random
 import requests
 from parsel import Selector
 from wallme import utils
+from wallme.downloaders import Image
 from wallme.downloaders.base import BaseDownloader
 
 
@@ -32,12 +33,19 @@ class NatgeoDownloader(BaseDownloader):
         return categories
 
     # noinspection PyMethodOverriding
-    def download(self, category=None, position=None):
+    def download(self, **kwargs):
         """
         :param position - position of image or defaults to random
         :param category - archive category, see get_categories for the list
         :return: dict{'content': <image_content>, <some meta data>...}
         """
+        category = kwargs.get('category', None)
+        position = kwargs.get('position', 0)
+        rand = False
+        if position == 0:
+            rand = True
+        if position > 1:
+            position -= 1  # since 0 is reserved reduce position
         if not category:
             category = self.default_cat
         category = category.lower()
@@ -49,7 +57,7 @@ class NatgeoDownloader(BaseDownloader):
         items = sel.xpath("//div[@id='search_results']//a[img]/@href").extract()
         items_per_page = len(items)
         # find the right image by position
-        if position is None:
+        if rand:
             position = random.randrange(0, total_items)
         if position < items_per_page:
             image = items[position]
@@ -67,15 +75,16 @@ class NatgeoDownloader(BaseDownloader):
         image_url = sel.xpath("//div[@class='primary_photo']/a/img/@src").extract_first()
         image_url = utils.fix_url_http(image_url)
         meta = {
+            'url': image_url,
             'title': sel.xpath("//div[@class='primary_photo']/a/img/@alt").extract_first(),
             'desc_title': sel.xpath("//div[@id='caption']/h2/text()").extract_first(),
             'desc': sel.xpath("//div[@id='caption']/p[not(@class)]/text()").extract_first(),
             'author': sel.xpath("//div[@id='caption']/p[@class='credit']/a/text()").extract_first(),
             'publication_date': sel.xpath("//div[@id='caption']/p[@class='publication_time']"
                                           "/text()").extract_first(),
-            'url': image_url,
         }
-        return self.download_image(image_url, meta)
+        image = Image(image_url, meta)
+        return self.process_url(image, kwargs)
 
 if __name__ == '__main__':
     ng = NatgeoDownloader()
