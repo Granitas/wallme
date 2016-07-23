@@ -3,7 +3,7 @@ import os
 import click
 import sys
 
-from wallme.wallpaper_setters.finder import WALL_SETTERS
+from wallme.wallpapersetters import WALL_SETTERS
 
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 

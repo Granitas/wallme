@@ -3,7 +3,7 @@ import click
 import os
 
 from wallme.history import log_wallpaper
-from wallme.wallpaper_setters.finder import find_setter_module
+from wallme.wallpapersetters import find_setter_module
 
 
 def set_wallpaper(content, context):
