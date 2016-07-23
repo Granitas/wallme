@@ -8,7 +8,7 @@ from wallme.downloaders.natgeo import NatgeoDownloader
 @click.pass_context
 @click.option('--list', 'list_categories', default=False, is_flag=True, help='list available categories')
 @click.option('--category', default=None, help='category from which to download images, see --list')
-@click.option('--position', default=0, help='image position +-[1..n]; 0 for random')
+@click.option('--position', default=0, help='image position +-[1..n]; (default=0 for random)')
 def cli(cli_ctx, **kwargs):
     """Downloader for image of the day of nationalgeographic.com"""
     downloader = NatgeoDownloader()

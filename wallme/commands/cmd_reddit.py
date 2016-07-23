@@ -6,7 +6,7 @@ from wallme.downloaders.reddit import RedditDownloader
 @click.command('reddit', help='download image from reddit.com')
 @click.pass_context
 @click.argument('subreddit')
-@click.option('--position', '-p', default=0, help='choose position +-[1..25]; 0 for random')
+@click.option('--position', '-p', default=0, help='choose position +-[1..25]; (default=0 for random)')
 @click.option('--list-tabs', is_flag=True, help='list available tabs')
 @click.option('--tab', '-t', default='hot', help='tab name')
 def cli(cli_ctx, **kwargs):
