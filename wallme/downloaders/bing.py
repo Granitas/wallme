@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 import sys
 
 import requests
-from wallme.downloaders.base import BaseDownloader
+from wallme.downloaders import BaseDownloader
 
 
 class BingDownloader(BaseDownloader):

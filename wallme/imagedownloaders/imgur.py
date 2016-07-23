@@ -1,8 +1,7 @@
 import parsel
 import requests
 from wallme import utils
-from wallme.image_downloaders.base import BaseImageDownloader
-from wallme.image_downloaders import make_content
+from wallme.imagedownloaders import make_content, BaseImageDownloader
 
 
 class ImageDownloader(BaseImageDownloader):

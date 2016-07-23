@@ -1,5 +1,5 @@
 import click
-from wallme.commands import base
+from wallme.commands import set_wallpaper
 from wallme.downloaders.reddit import RedditDownloader
 
 
@@ -23,5 +23,5 @@ def cli(cli_ctx, **kwargs):
         return
     click.echo('setting random wallpaper from /r/{} {} tab'.format(subreddit, tab))
     content = downloader.download(**kwargs, cli_ctx=cli_ctx)
-    base.set_wallpaper(content, cli_ctx)
+    set_wallpaper(content, cli_ctx)
 

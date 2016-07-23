@@ -1,7 +1,7 @@
 import click
 
 from wallme.wallpaper_setters.finder import WALL_SETTERS
-from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
+from wallme.imagedownloaders.finder import IMAGE_DOWNLOADERS
 from wallme.downloaders import DOWNLOADERS
 
 

@@ -1,16 +1,64 @@
+import pkgutil
+import importlib
 import logging
-
 import os
+from urllib.parse import urlsplit
+
 import parsel
 import requests
+
 from wallme import utils
-from wallme.image_downloaders import make_content
+from wallme.imagedownloaders import make_content
+
+IMAGE_DOWNLOADERS = [n[1] for n in pkgutil.iter_modules([os.path.dirname(__file__)])]
+
+
+def get_dlmodule_bydomain(url):
+    """
+    Finds what image_downloader module to use for specific url by it's domain
+    e.g.
+    http://i.imgur.com/u6SmpU5.jpg
+    -> <module 'wallme.image_downloaders.imgur' from ...>
+    """
+
+    domain = urlsplit(url).netloc.split('.')[-2]
+    for downloader in IMAGE_DOWNLOADERS:
+        if downloader == domain:
+            matching_domain = domain
+            dl_module = importlib.import_module('wallme.image_downloaders.{}'.format(matching_domain))
+            return dl_module
+
+
+# todo turn this into a proper class
+def make_content(response, meta=None):
+    """
+    Converts requests.response to content dictionary
+    :param response: requests response object
+    :param meta[None]: extra data used in generating content
+    :return:
+    return {'content': image_content in bytes,
+           'name': filename,
+           'extension': file extension,
+           'meta': meta data from :param meta,
+           'url': url of file image}
+    """
+    if not meta:
+        meta = {}
+    name = os.path.basename(response.url)
+    extension = response.headers.get('Content-Type', '').split('/')[-1]
+    if not extension:
+        extension = name.rsplit('.', 1)[-1]
+    return {'content': response.content,
+            'name': name,
+            'extension': extension,
+            'meta': meta,
+            'url': response.url}
+
 
 BIGGEST_IMAGE = 'find_biggest_image'
 
 
 class BaseImageDownloader:
-
     def __init__(self, default_behaviour=BIGGEST_IMAGE):
         self.default_behaviour = default_behaviour
         # Set up logging
@@ -67,8 +115,3 @@ class BaseImageDownloader:
         images = [i for i in images if 'image' in i.headers['Content-Type']]
         images = sorted(images, key=lambda v: int(v.headers['Content-Length']), reverse=True)
         return make_content(images[0], meta=meta)
-
-
-if __name__ == '__main__':
-    d = BaseImageDownloader()
-    image = d.find_images(requests.get('http://imgur.com/gallery/YZvSY'))

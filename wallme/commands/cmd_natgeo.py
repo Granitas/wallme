@@ -1,6 +1,6 @@
 import click
 
-from wallme.commands import base
+from wallme.commands import set_wallpaper
 from wallme.downloaders.natgeo import NatgeoDownloader
 
 
@@ -22,4 +22,4 @@ def cli(cli_ctx, **kwargs):
     click.echo('setting image {} from category {}'
                .format(position_text, kwargs['category'] or downloader.default_cat))
     content = downloader.download(**kwargs, cli_ctx=cli_ctx)
-    base.set_wallpaper(content, cli_ctx)
+    set_wallpaper(content, cli_ctx)

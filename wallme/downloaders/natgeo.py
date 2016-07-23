@@ -5,8 +5,7 @@ import random
 import requests
 from parsel import Selector
 from wallme import utils
-from wallme.downloaders import Image
-from wallme.downloaders.base import BaseDownloader
+from wallme.downloaders import Image, BaseDownloader
 
 
 class NatgeoDownloader(BaseDownloader):

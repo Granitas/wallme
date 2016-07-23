@@ -4,8 +4,7 @@ import random
 import click
 import praw
 
-from wallme.downloaders import Image
-from wallme.downloaders.base import BaseDownloader
+from wallme.downloaders import Image, BaseDownloader
 
 
 class RedditDownloader(BaseDownloader):

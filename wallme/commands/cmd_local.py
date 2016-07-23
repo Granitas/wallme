@@ -1,6 +1,6 @@
 import click
 
-from wallme.commands import base
+from wallme.commands import set_wallpaper
 from wallme.downloaders.local import LocalNonDownloader
 
 
@@ -16,4 +16,4 @@ def cli(context, **kwargs):
     click.echo("setting {} image from local history".format(position_text))
     content = LocalNonDownloader.download(year_month, position)
     context.obj['no_log'] = True
-    base.set_wallpaper(content, context)
+    set_wallpaper(content, context)

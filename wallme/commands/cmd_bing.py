@@ -1,6 +1,6 @@
 import click
 from wallme.downloaders.bing import BingDownloader
-from wallme.commands import base
+from wallme.commands import set_wallpaper
 
 
 @click.command('bing', help='download image of the day from bing.com')
@@ -11,4 +11,4 @@ def cli(context, **kwargs):
     date = kwargs['date']
     click.echo('setting daily image from bing for {} as wallpaper'.format(date or 'Today'))
     content = BingDownloader().download(date)
-    base.set_wallpaper(content, context)
+    set_wallpaper(content, context)
