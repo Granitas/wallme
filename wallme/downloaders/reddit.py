@@ -1,9 +1,11 @@
 import logging
 import random
-import praw
-from wallme.downloaders.base import BaseDownloader
 
-from wallme.utils import fix_url_http
+import click
+import praw
+
+from wallme.downloaders import Image
+from wallme.downloaders.base import BaseDownloader
 
 
 class RedditDownloader(BaseDownloader):
@@ -34,7 +36,7 @@ class RedditDownloader(BaseDownloader):
         self.downloader = praw.Reddit(user_agent='random_wallpaper')
 
     # noinspection PyMethodOverriding
-    def download(self, subreddit, tab, position=None):
+    def download(self, **kwargs):
         """
         :param subreddit: subreddit to crawl; i.e. wallpapers for reddit.com/r/wallpapers
         :param position: position of post, None will download random
@@ -58,21 +60,31 @@ class RedditDownloader(BaseDownloader):
         top_from_year
         :return: dict{'content': <image_content>, <some meta data>...}
         """
-        subreddit = self.downloader.get_subreddit(subreddit)
+        subreddit = kwargs['subreddit']
+        position = kwargs.get('position', 0)
+        tab = kwargs.get('tab', None)
+        rand = False
+        if position == 0:
+            rand = True
+        if position > 1:
+            position -= 1  # since 0 is reserved reduce position
         # retrieve submissions
-        submission_get_func = getattr(subreddit, 'get_{}'.format(tab), None)
+        submission_get_func = getattr(self.downloader.get_subreddit(subreddit),
+                                      'get_{}'.format(tab), None)
         if not submission_get_func:
             logging.error('Incorrect tab {}'.format(tab))
         submissions = list(submission_get_func())
         submissions = [s for s in submissions if '/comments/' not in s.url]
+        if position + 1 > len(submissions):
+            click.echo('position setting is incorrect, should be +-[1..25]')
+            return
         # choose a submission (either random or by position arg)
-        if position is None:
+        if rand:
             sub = random.choice(submissions)
         else:
             sub = submissions[position]
         # extract image url and meta data
-        url = fix_url_http(sub.url)
         meta = {'score': sub.score,
                 'title': sub.title,
                 'url': sub.permalink}
-        return self.download_image(url, meta)
+        return self.process_url(Image(sub.url, meta), kwargs)

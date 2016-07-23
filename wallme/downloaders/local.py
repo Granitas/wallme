@@ -6,7 +6,7 @@ from requests.models import Response
 
 from wallme.downloaders.base import BaseDownloader
 from wallme.history import get_history
-from wallme.image_downloaders.content import make_content
+from wallme.image_downloaders import make_content
 
 
 class LocalNonDownloader(BaseDownloader):

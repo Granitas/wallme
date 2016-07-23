@@ -32,6 +32,8 @@ class ComplexCLI(click.MultiCommand):
 @click.command(cls=ComplexCLI)
 @click.version_option()
 @click.option('--verbose', help='set verbosity', is_flag=True)
+@click.option('--unique', help='only results not found in history', is_flag=True)
+@click.option('--unique-month', help='only results not found in this months history', is_flag=True)
 @click.option('--notify', help='send notify-send to the system', is_flag=True)
 @click.option('--no-log', help='log wallpaper', is_flag=True)
 @click.option('--setter_script', help='script to set wallpaper, {file} replaced with filename')

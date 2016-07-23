@@ -6,11 +6,12 @@ from wallme.downloaders.reddit import RedditDownloader
 @click.command('reddit', help='download image from reddit.com')
 @click.pass_context
 @click.argument('subreddit')
-@click.option('--position', default=0, help='result position; 0 == random')
+@click.option('--position', '-p', default=0, help='choose position +-[1..25]; 0 for random')
 @click.option('--list-tabs', is_flag=True, help='list available tabs')
-@click.option('--tab', default='hot', help='tab name')
-def cli(cli_kwargs, subreddit, tab, position, list_tabs, *args):
+@click.option('--tab', '-t', default='hot', help='tab name')
+def cli(cli_ctx, **kwargs):
     """Downloader for reddit.com"""
+    tab, position, list_tabs, subreddit = [kwargs.get(x, None) for x in ['tab', 'position', 'list_tabs', 'subreddit']]
     downloader = RedditDownloader()
     if list_tabs:
         click.echo('Available Tabs:')
@@ -21,6 +22,6 @@ def cli(cli_kwargs, subreddit, tab, position, list_tabs, *args):
         click.echo('Incorrect tab see --list-tabs for viable options', err=True)
         return
     click.echo('setting random wallpaper from /r/{} {} tab'.format(subreddit, tab))
-    content = downloader.download(subreddit, tab=tab, position=position or None)
-    base.set_wallpaper(content, cli_kwargs)
+    content = downloader.download(**kwargs, cli_ctx=cli_ctx)
+    base.set_wallpaper(content, cli_ctx)
 

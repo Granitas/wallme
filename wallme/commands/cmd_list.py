@@ -2,7 +2,7 @@ import click
 
 from wallme.wallpaper_setters.finder import WALL_SETTERS
 from wallme.image_downloaders.finder import IMAGE_DOWNLOADERS
-from wallme.downloaders.finder import DOWNLOADERS
+from wallme.downloaders import DOWNLOADERS
 
 
 @click.command('list', help='list modules')

@@ -4,8 +4,27 @@ from datetime import datetime
 
 from wallme.settings import WALLME_HISTORY_DIR, WALLME_DIR
 
-WALLME_HISTORY_JSON_LOCS = [os.path.join(WALLME_HISTORY_DIR,  year_month, 'history.json')
+WALLME_HISTORY_JSON_LOCS = [os.path.join(WALLME_HISTORY_DIR, year_month, 'history.json')
                             for year_month in sorted(os.listdir(WALLME_HISTORY_DIR), key=int)]
+
+
+class History:
+    def __init__(self):
+        self.__all = None
+        self.__this_month = None
+
+    @property
+    def this_month(self):
+        if not self.__this_month:
+            this_month = datetime.now().strftime('%Y%m')
+            self.__this_month = get_history(this_month)
+        return self.__this_month
+
+    @property
+    def all(self):
+        if not self.__all:
+            self.__all = get_history()
+        return self.__all
 
 
 def get_history(year_month=None):
@@ -21,6 +40,9 @@ def get_history(year_month=None):
             for item in history_json['items']:
                 results.append((item, os.path.dirname(loc)))
     return results
+
+
+HISTORY = History()
 
 
 def log_wallpaper(content):

@@ -12,6 +12,8 @@ def set_wallpaper(content, context):
     :param content: content dict for image
     :param context: cli interface context
     """
+    if not content:
+        return
     home = os.path.expanduser('~')
     image_loc = os.path.join(home, '.wallme/wallpaper')
     with open(image_loc, 'wb') as wallme_file:
