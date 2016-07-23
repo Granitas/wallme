@@ -8,7 +8,6 @@ import parsel
 import requests
 
 from wallme import utils
-from wallme.imagedownloaders import make_content
 
 IMAGE_DOWNLOADERS = [n[1] for n in pkgutil.iter_modules([os.path.dirname(__file__)])]
 

@@ -21,7 +21,7 @@ class BaseDownloader:
         if retries < MAX_RETRIES:
             click.echo('got duplicate, retrying {}/{}...'.format(retries, MAX_RETRIES))
             kwargs['retries'] = retries + 1
-            self.download(**kwargs)
+            return self.download(**kwargs)
         else:
             click.secho('failed to find unique random wallpaper after {} tries'.format(MAX_RETRIES),
                         err=True, fg='red')
@@ -35,15 +35,21 @@ class BaseDownloader:
         if cli_ctx:
             ctx = cli_ctx.obj
             is_unique = any(i in ctx.keys() for i in ['unique', 'unique_month'])
-            is_random = ctx.get('position', 0) == 0
-            if is_unique and is_random:
+            is_random = download_kwargs.get('position', 0) == 0
+            cant_random = download_kwargs.get('cant_random', False)
+            if (is_unique and is_random) or (is_unique and cant_random):
                 history = []
                 if ctx.get('unique_month', False):
                     history = HISTORY.all
                 if ctx.get('unique', False):
                     history = HISTORY.this_month
                 if image.url in [i[0]['url'] for i in history]:
-                    self._retry(**download_kwargs)
+                    if cant_random:
+                        click.secho("Current wallpaper already in history, "
+                                    "downloader doesn't support random retrieval", fg='yellow')
+                        return
+                    else:
+                        return self._retry(**download_kwargs)
         return self.download_image(image)
 
     def download_image(self, image):
