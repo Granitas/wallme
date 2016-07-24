@@ -3,6 +3,8 @@ import os
 import click
 import sys
 
+from wallme import settings
+
 from wallme.wallpapersetters import WALL_SETTERS
 
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
@@ -32,6 +34,7 @@ class ComplexCLI(click.MultiCommand):
 @click.command(cls=ComplexCLI)
 @click.version_option()
 @click.option('--verbose', help='set verbosity', is_flag=True)
+@click.option('--debug', help='set debug messages', is_flag=True)
 @click.option('--unique', help='only results not found in history', is_flag=True)
 @click.option('--unique-month', help='only results not found in this months history', is_flag=True)
 @click.option('--notify', help='send notify-send to the system', is_flag=True)
@@ -46,8 +49,22 @@ def cli(context, **kwargs):
     Modular wallpaper getter and setter.
     """
     context.obj = kwargs
-    if kwargs['verbose']:
-        log_stream = logging.StreamHandler()
-        log_stream.setLevel(logging.DEBUG)
-        logging.basicConfig(handlers=[log_stream])
+    if kwargs['debug']:
+        setup_logging(level=logging.DEBUG)
+    else:
+        setup_logging()
 
+
+def setup_logging(level=logging.ERROR):
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    # console stream
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    ch.setFormatter(logging.Formatter(settings.CONSOLE_LOG_FORMAT))
+    logger.addHandler(ch)
+    # file stream (always debug)
+    fh = logging.FileHandler(settings.LOG_DIR)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter(settings.FILE_LOG_FORMAT))
+    logger.addHandler(fh)

@@ -16,9 +16,9 @@ class BingDownloader(BaseDownloader):
     api_tpl = "http://www.bing.com/HPImageArchive.aspx?" \
               "format=js&idx={days}&n=1&nc={timestamp}&pid=hp".format
     date_format = '%Y-%m-%d'
+    max_position = 10  # amount of days back of wallpapers bing keeps, is very unpredictable
     # extend
     look_for_dl_module = False
-    max_position = 10  # amount of days back of wallpapers bing keeps, is very unpredictable
 
     # noinspection PyMethodOverriding
     def download(self, **kwargs):

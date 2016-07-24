@@ -34,7 +34,6 @@ class RedditDownloader(BaseDownloader):
         super().__init__()
         self.downloader = praw.Reddit(user_agent='random_wallpaper')
 
-    # noinspection PyMethodOverriding
     def download(self, **kwargs):
         """
         :param subreddit: subreddit to crawl; i.e. wallpapers for reddit.com/r/wallpapers
@@ -61,12 +60,8 @@ class RedditDownloader(BaseDownloader):
         """
         subreddit = kwargs['subreddit']
         position = kwargs.get('position', 0)
+        _, position, rand = self._make_position(position)
         tab = kwargs.get('tab', None)
-        rand = False
-        if position == 0:
-            rand = True
-        if position > 1:
-            position -= 1  # since 0 is reserved reduce position
         # retrieve submissions
         submission_get_func = getattr(self.downloader.get_subreddit(subreddit),
                                       'get_{}'.format(tab), None)
@@ -74,14 +69,14 @@ class RedditDownloader(BaseDownloader):
             logging.error('Incorrect tab {}'.format(tab))
         submissions = list(submission_get_func())
         submissions = [s for s in submissions if '/comments/' not in s.url]
-        if position + 1 > len(submissions):
+        if position > len(submissions):
             click.echo('position setting is incorrect, should be +-[1..25]')
             return
         # choose a submission (either random or by position arg)
         if rand:
             sub = random.choice(submissions)
         else:
-            sub = submissions[position]
+            sub = submissions[position - 1]
         # extract image url and meta data
         meta = {'score': sub.score,
                 'title': sub.title,

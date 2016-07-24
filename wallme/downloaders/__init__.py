@@ -4,6 +4,7 @@ import os
 import logging
 
 import click
+import math
 
 from wallme import utils
 from wallme.history import HISTORY
@@ -15,6 +16,7 @@ DOWNLOADERS = [n[1] for n in pkgutil.iter_modules([os.path.dirname(__file__)])]
 
 class BaseDownloader:
     look_for_dl_module = True
+    items_per_page = None
 
     def _retry(self, **kwargs):
         retries = kwargs.get('retries', 0)
@@ -66,6 +68,15 @@ class BaseDownloader:
                 logging.warning('No image parser for {}'.format(url))
             return BaseImageDownloader().download(url, meta)
         return dl_module.ImageDownloader().download(url, meta)
+
+    def _make_position(self, position):
+        rand = True if not position else False
+        page = 1
+        if self.items_per_page:
+            page = math.ceil((position + 1) / self.items_per_page)
+            if position > self.items_per_page:
+                position -= page * self.items_per_page
+        return page, position, rand
 
 
 class Image:
