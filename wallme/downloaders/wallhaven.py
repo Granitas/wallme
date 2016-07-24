@@ -14,7 +14,6 @@ class WallhavenDownloader(BaseDownloader):
     Downloader for wallhaven.cc
     """
     base_url = 'https://alpha.wallhaven.cc/search'
-    wallpaper_url = 'https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{}.{}'.format
     look_for_dl_module = False
 
     items_per_page = 24.0
@@ -45,16 +44,26 @@ class WallhavenDownloader(BaseDownloader):
                 url = add_or_replace_parameter(url, arg, locals()[arg])
         # Download and parse items
         resp = requests.get(url)
-        sel = Selector(text=resp.text)
-        items = sel.xpath("//section[@class='thumb-listing-page']//figure")
+        if resp.status_code != 200:
+            self.logger.error('Failed to download image list {}'.format(resp.url))
+            return
+        list_sel = Selector(text=resp.text)
+        items = list_sel.xpath("//section[@class='thumb-listing-page']//figure/a/@href").extract()
         item = random.choice(items) if rand else items[position - 1]
-        image_ext = item.xpath('img/@data-src').extract_first().rsplit('.')[-1]
-        image_id = item.xpath('@data-wallpaper-id').extract_first()
-        image_url = self.wallpaper_url(image_id, image_ext)
+        resp = requests.get(item)
+        if resp.status_code != 200:
+            self.logger.error('Failed to download image page {}'.format(resp.url))
+            return
+        sel = Selector(text=resp.text)
+        image_url = sel.xpath("//img[@id='wallpaper']/@src").extract_first()
         meta = {
-            'id': image_id,
-            'res': item.xpath(".//span[@class='wall-res']/text()").extract_first(),
-            'favorites': item.xpath(".//a[contains(@class,'wall-favs')]/text()").extract_first(),
+            'id': sel.xpath("//img[@id='wallpaper']/@data-wallpaper-id").extract_first(),
+            'tags': sel.xpath("//ul[@id='tags']//li/a/text()").extract(),
+            'views': sel.xpath("//dt[contains(text(),'Views')]/following-sibling::dd[1]/text()").extract_first(),
+            'favorites': sel.xpath("//dt[contains(text(),'Favorites')]"
+                                   "/following-sibling::dd[1]//text()").extract_first(),
+            'res': sel.xpath("//h3/text()").extract_first(),
         }
         image = Image(image_url, meta)
         return self.process_url(image, kwargs)
+
