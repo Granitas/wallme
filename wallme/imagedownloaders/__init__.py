@@ -24,7 +24,7 @@ def get_dlmodule_bydomain(url):
     for downloader in IMAGE_DOWNLOADERS:
         if downloader == domain:
             matching_domain = domain
-            dl_module = importlib.import_module('wallme.image_downloaders.{}'.format(matching_domain))
+            dl_module = importlib.import_module('wallme.imagedownloaders.{}'.format(matching_domain))
             return dl_module
 
 
