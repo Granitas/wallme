@@ -64,7 +64,7 @@ def setup_logging(level=logging.ERROR):
     ch.setFormatter(logging.Formatter(settings.CONSOLE_LOG_FORMAT))
     logger.addHandler(ch)
     # file stream (always debug)
-    fh = logging.FileHandler(settings.LOG_DIR)
+    fh = logging.FileHandler(settings.LOG_DIR, mode='w')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter(settings.FILE_LOG_FORMAT))
     logger.addHandler(fh)
