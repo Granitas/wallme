@@ -7,6 +7,7 @@ from wallme.commands import set_wallpaper
 
 @click.command('wallhaven', help='download image from wallhaven.cc')
 @click.pass_context
+@click.option('-q', '--query', help='search query to use')
 @click.option('-p', '--position', default=0, help='position, +-[1..n] (default=0 random)')
 @click.option('--sorting', help='sorting of results (default:random)', default='random',
               type=click.Choice(['favorites', 'views', 'relevance', 'date_added', 'random']))

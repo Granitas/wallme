@@ -23,6 +23,7 @@ class WallhavenDownloader(BaseDownloader):
     def download(self, **kwargs):
         """
         Download and set image from wallhaven.cc
+        :param query - query of search
         :param position - position of image to choose from listed from 1 to 24,
         default is 0 = random.
         :param categories - categories to download from in 000 format, where every number
@@ -36,9 +37,10 @@ class WallhavenDownloader(BaseDownloader):
         categories = kwargs.get('categories', '')
         purity = kwargs.get('purity', '')
         sorting = kwargs.get('sorting', '')
+        q = kwargs.get('query', '')  # search query
         page, position, rand = self._make_position(kwargs.get('position', 0))
         url = self.base_url
-        for arg in ['categories', 'purity', 'sorting', 'order', 'page']:
+        for arg in ['categories', 'purity', 'sorting', 'order', 'page', 'q']:
             value = locals()[arg]
             if value:
                 url = add_or_replace_parameter(url, arg, locals()[arg])
